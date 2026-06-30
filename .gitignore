@@ -6,8 +6,6 @@ __pycache__/
 venv/
 env/
 .env
-data/*.csv
-!data/.gitkeep
 models/*.pkl
 models/*.joblib
 !models/.gitkeep

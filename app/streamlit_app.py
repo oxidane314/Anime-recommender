@@ -36,12 +36,35 @@ st.set_page_config(page_title="Anime Recommender", page_icon="🎌", layout="wid
 @st.cache_resource(show_spinner="Loading data & training models (first run only)...")
 def load_system():
     data = build_clean_dataset()
-    content_rec = ContentRecommender(data.anime)
-    collab_rec = CollaborativeRecommender(data.ratings_explicit)
-    collab_rec.train_svd()
-    hybrid_rec = HybridRecommender(content_rec, collab_rec, data.anime, w_collab=0.6, w_content=0.4)
-    return data, content_rec, collab_rec, hybrid_rec
 
+    content_rec = ContentRecommender(data.anime)
+
+    collab_rec = CollaborativeRecommender(data.ratings_explicit)
+
+    model_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "models",
+        "svd_model.joblib"
+    )
+
+    if not os.path.exists(model_path):
+        st.error(
+            "Trained model not found!\n\n"
+            "Run train_model.py locally first."
+        )
+        st.stop()
+
+    collab_rec.svd_model = CollaborativeRecommender.load("svd_model.joblib")
+
+    hybrid_rec = HybridRecommender(
+        content_rec,
+        collab_rec,
+        data.anime,
+        w_collab=0.6,
+        w_content=0.4,
+    )
+
+    return data, content_rec, collab_rec, hybrid_rec
 
 data, content_rec, collab_rec, hybrid_rec = load_system()
 anime_df = data.anime
