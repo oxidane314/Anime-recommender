@@ -36,7 +36,7 @@ def load_raw(anime_path: str = ANIME_PATH, rating_path: str = RATING_PATH):
     """Load the two raw CSVs."""
     logger.info("Loading raw CSV files...")
     anime = pd.read_csv(anime_path)
-    ratings = pd.read_csv(rating_path, nrows = 200000)
+    ratings = pd.read_csv(rating_path, nrows = 50000)
     logger.info(f"anime.csv shape: {anime.shape} | rating.csv shape: {ratings.shape}")
     return anime, ratings
 
