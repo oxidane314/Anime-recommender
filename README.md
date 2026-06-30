@@ -1,186 +1,208 @@
 # 🎌 Anime Recommendation System
 
-A production-style, end-to-end **machine learning recommendation engine** built on the
-[Anime Recommendations Database](https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database)
-(Kaggle), combining **popularity-based, content-based, collaborative filtering, and hybrid**
-recommendation strategies behind a deployed Streamlit web application.
+A machine learning project that recommends anime using multiple recommendation techniques instead of relying on a single algorithm. The project combines popularity-based recommendations, content similarity, collaborative filtering, and a hybrid model, all wrapped inside an interactive Streamlit web application.
 
-> Built to demonstrate the full ML lifecycle expected in industry: EDA → feature
-> engineering → multiple modeling approaches → quantitative evaluation → explainability →
-> deployment — not just a single notebook.
+The goal was to understand how modern recommendation systems work end-to-end—from cleaning real-world data to training models, evaluating them, and deploying an application that users can interact with.
 
 ---
 
-## 📌 Project Overview
+## 🚀 Live Demo
 
-| | |
-|---|---|
-| **Problem** | Help anime viewers discover titles they're likely to enjoy, using both item metadata and community rating behavior |
-| **Dataset** | 12,000+ anime titles, 7M+ user ratings (Kaggle CooperUnion dataset) |
-| **Approaches** | Popularity-based · Content-based (TF-IDF + cosine similarity) · Collaborative filtering (KNN & SVD) · Hybrid weighted ensemble |
-| **Evaluation** | RMSE, MAE, Precision@K, Recall@K, Hit-Rate@K |
-| **Explainability** | Every recommendation includes a natural-language "why this was recommended" explanation |
-| **Deployment** | Multi-page Streamlit application |
+**Streamlit App:** https://your-streamlit-link.streamlit.app/
 
 ---
 
-## 🧠 Methodology
+## Dashboard Preview
 
-### 1. Data Understanding & Cleaning
-- Loaded `anime.csv` (metadata) and `rating.csv` (7M+ user-anime interactions).
-- Handled missing genres/types/episode counts, removed duplicates, coerced malformed
-  numeric fields (`episodes == "Unknown"` → median imputation).
-- Separated **explicit ratings** (1–10) from **implicit "watched but unrated"** (`-1`) signals.
-- Full EDA in [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb): rating distributions,
-  genre frequency, most popular/highest-rated titles, user activity skew.
+### Home Page
 
-### 2. Popularity-Based Recommendations (`src/popularity.py`)
-- Uses the **IMDB Bayesian weighted-rating formula** to avoid letting low-vote-count
-  anime with a single 10/10 rating outrank well-established, broadly-loved titles:
+![Home](assets/home_page.png)
 
-  ```
-  WR = (v / (v+m)) * R + (m / (v+m)) * C
-  ```
+### Similar Anime Recommendations
 
-### 3. Content-Based Filtering (`src/content_based.py`)
-- Builds a text "soup" from genre tokens (genre weighted 2×), type, and an
-  episode-count bucket.
-- **TF-IDF vectorization** + **cosine similarity** to surface similar titles.
-- `recommend_similar("Attack on Titan")` → top-N most similar anime by genre/style.
-- Also builds **user taste profiles** by averaging the TF-IDF vectors of a user's
-  liked anime — used in the hybrid model.
+![Similar Anime](assets/similar_anime.png)
 
-### 4. Collaborative Filtering (`src/collaborative.py`)
-- Built with the **`surprise`** library on the explicit user-item rating matrix.
-- **KNNBasic** (item-based, cosine similarity) and **SVD** (matrix factorization) are
-  trained, evaluated on an 80/20 split, and compared.
-- `recommend_for_user(user_id)` predicts ratings for all unseen anime and ranks them.
+### Personalized Recommendations
 
-### 5. Hybrid Recommendations (`src/hybrid.py`)
-- Combines normalized collaborative + content scores:
+![Personalized](assets/personalized.png)
 
-  ```
-  final_score = 0.6 * collaborative_score + 0.4 * content_score
-  ```
-- Falls back gracefully to content-only signal for cold-start users with sparse history.
+### Analytics Dashboard
 
-### 6. Model Evaluation (`src/evaluation.py`)
-- **Collaborative:** RMSE, MAE, Precision@K, Recall@K.
-- **Content-based:** Leave-one-out Hit-Rate@K against held-out liked titles.
-- Auto-generates a Markdown performance report (`reports/performance_report.md`).
-
-### 7. Explainable Recommendations
-- Every similar/hybrid recommendation includes a generated explanation, e.g.:
-  > *"Vinland Saga is recommended because you liked Attack on Titan. Both share
-  > Action, Drama, and Military themes."*
-
-### 8. Streamlit Web Application (`app/streamlit_app.py`)
-Six pages: **Home · Anime Search · Similar Anime · Personalized Recommendations ·
-Top Anime · Analytics Dashboard.**
+![Analytics](assets/analytics_dashboard.png)
 
 ---
 
-## 📊 Results (on sample run — see `reports/performance_report.md` for live numbers)
+## Project Overview
 
-| Model | RMSE ↓ | MAE ↓ |
-|---|---|---|
-| SVD (Matrix Factorization) | ~1.25 | ~1.01 |
-| KNNBasic (Item-Based) | ~1.48 | ~1.20 |
+This project uses the Anime Recommendations Database from Kaggle, containing over **12,000 anime titles** and **7 million user ratings**.
 
-> SVD outperforms KNNBasic on both metrics and is used as the production collaborative model.
-> Re-run `src/evaluation.py` after plugging in the full Kaggle dataset for production-scale numbers.
+Instead of building only one recommendation algorithm, I implemented and compared multiple approaches before combining them into a hybrid recommender.
 
-**Sample visualizations** (full set in `notebooks/01_eda.ipynb` and `reports/`):
+The application allows users to:
 
-| Rating Distribution | Genre Frequency | User Activity |
-|---|---|---|
-| ![ratings](assets/rating_distributions.png) | ![genres](assets/genre_distribution.png) | ![activity](assets/user_activity_distribution.png) |
+* Search for anime
+* Find similar titles
+* Get personalized recommendations
+* Browse top-rated anime
+* Explore dataset analytics through interactive visualizations
 
 ---
 
-## 🗂️ Project Structure
+## Recommendation Models
 
-```
+### ⭐ Popularity-Based
+
+Ranks anime using the IMDb weighted rating formula to avoid bias toward titles with very few ratings.
+
+---
+
+### 🎭 Content-Based Filtering
+
+Uses:
+
+* TF-IDF Vectorization
+* Cosine Similarity
+
+Anime are represented using genres, type, and episode information. Users receive recommendations based on similarity between anime rather than community ratings.
+
+---
+
+### 👥 Collaborative Filtering
+
+Built using the Surprise library.
+
+Implemented:
+
+* KNNBasic
+* SVD Matrix Factorization
+
+The collaborative model predicts ratings for unseen anime based on historical user preferences.
+
+---
+
+### 🔀 Hybrid Recommendation System
+
+Combines both collaborative filtering and content similarity:
+
+Final Score =
+
+0.6 × Collaborative Score + 0.4 × Content Score
+
+For new users with little rating history, the system automatically falls back to the content-based recommender.
+
+---
+
+## Data Processing
+
+The raw dataset required several preprocessing steps before training.
+
+Some of the work included:
+
+* Handling missing values
+* Cleaning inconsistent episode information
+* Removing duplicate records
+* Converting data types
+* Separating explicit ratings from implicit interactions
+* Building user profiles for personalized recommendations
+
+---
+
+## Model Evaluation
+
+The recommendation models were evaluated using:
+
+* RMSE
+* MAE
+* Precision@K
+* Recall@K
+* Hit Rate@K
+
+Among the collaborative models, **SVD consistently achieved lower prediction error than KNNBasic**, making it the default collaborative model used in the application.
+
+---
+
+## Tech Stack
+
+* Python
+* Pandas
+* NumPy
+* Scikit-learn
+* Surprise
+* Streamlit
+* Matplotlib
+* Seaborn
+* Git & GitHub
+
+---
+
+## Project Structure
+
+```text
 Anime-Recommender/
 │
-├── data/                      # anime.csv, rating.csv (download from Kaggle)
-├── notebooks/
-│   ├── 01_eda.ipynb           # Full exploratory data analysis
-│   └── generate_sample_data.py# Synthetic sample-data generator for local testing
-├── src/
-│   ├── preprocessing.py       # Loading, cleaning, EDA stats
-│   ├── popularity.py          # Popularity-based engine
-│   ├── content_based.py       # TF-IDF + cosine similarity engine
-│   ├── collaborative.py       # KNN & SVD via `surprise`
-│   ├── hybrid.py               # Weighted hybrid engine + explanations
-│   └── evaluation.py           # RMSE/MAE/Precision@K/Recall@K + report generator
 ├── app/
-│   └── streamlit_app.py       # 6-page Streamlit application
-├── models/                    # Saved trained models (.joblib)
-├── reports/                   # Generated charts + performance_report.md
-├── assets/                    # README images
+├── src/
+├── data/
+├── notebooks/
+├── models/
+├── reports/
+├── assets/
 ├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## Running Locally
+
+Clone the repository
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/<your-username>/Anime-Recommender.git
-cd Anime-Recommender
-
-# 2. Create a virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Get the data
-# Download anime.csv and rating.csv from:
-# https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database
-# and place both files in data/
-#
-# (Or, to try the app immediately without Kaggle, generate a synthetic sample dataset:)
-python notebooks/generate_sample_data.py
-
-# 5. Run the EDA notebook (optional)
-jupyter notebook notebooks/01_eda.ipynb
-
-# 6. Generate the evaluation report (optional)
-cd src && python evaluation.py && cd ..
-
-# 7. Launch the web app
-streamlit run app/streamlit_app.py
+git clone https://github.com/yourusername/Anime-Recommender.git
 ```
 
-The app will be available at `http://localhost:8501`.
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the Streamlit application
+
+```bash
+python -m streamlit run app/streamlit_app.py
+```
 
 ---
 
-## 🔮 Future Improvements
+## What I Learned
 
-- Swap TF-IDF for sentence-transformer embeddings of synopsis text (richer semantics).
-- Add implicit-feedback modeling (treat "-1 watched-not-rated" as a positive signal via ALS).
-- Deploy via Docker + CI/CD (GitHub Actions) to Streamlit Community Cloud / AWS.
-- Add A/B testing harness to compare hybrid weight configurations.
-- Incorporate session-based / sequence-aware recommendations (e.g. GRU4Rec) for users
-  with no historical ratings.
-- Add user authentication and persistent rating storage for true production use.
+Building this project helped me understand:
 
----
-
-## 🛠️ Tech Stack
-
-`Python` · `Pandas` · `NumPy` · `Scikit-learn` · `Surprise` · `Matplotlib` · `Seaborn` ·
-`Streamlit` · `Git/GitHub`
+* Different recommendation system approaches and when each is useful
+* Feature engineering for recommendation tasks
+* Model evaluation beyond simple accuracy metrics
+* Building an end-to-end ML application with Streamlit
+* Deploying machine learning projects for real users
 
 ---
 
-## 📄 License
+## Future Improvements
 
-MIT — free to use for learning and portfolio purposes.
+* Sentence Transformer embeddings
+* Implicit feedback models
+* Docker deployment
+* User authentication
+* Better hybrid ranking strategy
+
+---
+
+## Dataset
+
+Anime Recommendations Database
+
+https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database
+
+---
+
+If you found this project interesting, feel free to ⭐ the repository.
